@@ -57,7 +57,6 @@ def main(page: ft.Page):
         result_text.value = str(res)
 
     def refresh():
-        # colores indicadores
         num1_label.bgcolor = ft.Colors.BLUE_100 if current_number == 1 else ft.Colors.GREY_200
         num2_label.bgcolor = ft.Colors.RED_100 if current_number == 2 else ft.Colors.GREY_200
         op_text.value = operation
@@ -108,12 +107,11 @@ def main(page: ft.Page):
         operation = "RESTA" if operation == "SUMA" else "SUMA"
         refresh()
 
-    # manejador genérico de teclado (intenta leer e.key o .data -> según versión)
+    # manejador de teclado
     def on_key(e):
         nonlocal value1, value2, current_number, operation
         try:
             key = getattr(e, "key", None) or getattr(e, "data", None) or str(e)
-            # si recibimos un dict-like de flet puede venir en e.data["key"]
             if isinstance(key, dict) and "key" in key:
                 key = key["key"]
         except Exception:
@@ -137,13 +135,11 @@ def main(page: ft.Page):
             operation = "RESTA" if operation == "SUMA" else "SUMA"
         elif isinstance(key, str) and key.lower() == "r":
             reset()
-        # refrescar siempre
         refresh()
 
-    # Intento robusto de enlazar el evento de teclado (varias versiones de Flet)
+    # vincular teclado
     attached = False
     try:
-        # preferible si existe
         if hasattr(page, "on_keyboard"):
             page.on_keyboard = on_key
             attached = True
@@ -158,7 +154,6 @@ def main(page: ft.Page):
         except Exception:
             attached = False
 
-    # si no pudimos conectar ninguna, creamos un TextField oculto y tratamos de enlazarle on_keyboard_event
     hidden_tf = None
     if not attached:
         try:
@@ -169,11 +164,9 @@ def main(page: ft.Page):
                 visible=False,
                 autofocus=True,
             )
-            # algunos builds soportan on_keyboard_event en controles
             try:
                 hidden_tf.on_keyboard_event = on_key
             except Exception:
-                # si no existe, intentamos on_submit como fallback (no ideal)
                 try:
                     hidden_tf.on_change = lambda e: None
                 except Exception:
@@ -183,7 +176,7 @@ def main(page: ft.Page):
         except Exception:
             attached = False
 
-    # Construcción de los controles visuales (botones)
+    # Controles de botones
     controls = ft.Row(
         [
             ft.Column(
@@ -217,7 +210,7 @@ def main(page: ft.Page):
         alignment=ft.MainAxisAlignment.CENTER,
     )
 
-    # Main UI
+    # Interfaz principal
     page.add(
         ft.Column(
             [
@@ -225,10 +218,10 @@ def main(page: ft.Page):
                 ft.Row([num1_label, row1, ft.Column([ft.Text("  "), value1_text])], alignment=ft.MainAxisAlignment.START),
                 ft.Row([num2_label, row2, ft.Column([ft.Text("  "), value2_text])], alignment=ft.MainAxisAlignment.START),
                 ft.Row([op_label, op_text, ft.Column([ft.Text("  "), result_label, result_text])], alignment=ft.MainAxisAlignment.START),
-                ft.Text("(También puedes usar ↑ ↓ → ← espacio y R — si tu versión de Flet captura teclado)", italic=True, size=12),
+                ft.Text("Usa el teclado: ↑ ↓ → ← espacio y R", italic=True, size=12),
                 ft.Divider(),
+                ft.Text("Estado de captura de teclado: " + ("✅ conectado" if attached else "❌ no conectado"), italic=True, size=12),
                 controls,
-                ft.Text("Estado de captura de teclado: " + ("✅ conectado" if attached else "❌ no conectado - usa los botones"), italic=True, size=12),
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.START,
@@ -238,5 +231,6 @@ def main(page: ft.Page):
 
     refresh()
     page.update()
+
 
 ft.app(target=main)
