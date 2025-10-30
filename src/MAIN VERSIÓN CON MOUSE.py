@@ -9,6 +9,7 @@ def main(page: ft.Page):
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.window_focused = True
 
+
     # --- ESTADO DE LA APLICACIÓN ---
     current_number = 1  # 1 para la fila de arriba, 2 para la de abajo
     value1 = 0
@@ -21,12 +22,12 @@ def main(page: ft.Page):
         """Crea una fila de 9 bolitas grises."""
         return [
             ft.Container(
-                width=28,
-                height=28,
-                border_radius=28,
+                width=18,
+                height=38,
+                border_radius=100,
                 bgcolor=ft.Colors.GREY_300,
-                border=ft.border.all(1, ft.Colors.BLACK),
-                margin=ft.margin.all(2),
+                border=ft.border.all(3, ft.Colors.BLACK),
+                margin=ft.margin.all(4),
             )
             for _ in range(num_balls)
         ]
