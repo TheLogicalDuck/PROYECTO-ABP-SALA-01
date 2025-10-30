@@ -19,7 +19,7 @@ def main(page: ft.Page):
 
     # --- FUNCIONES PARA CREAR LA INTERFAZ ---
     def create_row():
-        """Crea una fila de 9 bolitas grises."""
+        """Crea una fila de 10 bolitas grises con animación."""
         return [
             ft.Container(
                 width=18,
@@ -27,7 +27,9 @@ def main(page: ft.Page):
                 border_radius=100,
                 bgcolor=ft.Colors.GREY_300,
                 border=ft.border.all(3, ft.Colors.BLACK),
-                margin=ft.margin.all(4),
+                margin=ft.margin.all(0),
+                # --- LÍNEA CORREGIDA ---
+                animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
             )
             for _ in range(num_balls)
         ]
@@ -52,9 +54,15 @@ def main(page: ft.Page):
     # --- LÓGICA DE LA APLICACIÓN ---
 
     def update_balls(row_balls, value, color):
-        """Actualiza el color de las bolitas según el valor."""
+        """Actualiza el color y la posición de las bolitas con una animación."""
         for i in range(num_balls):
-            row_balls[i].bgcolor = color if i < value else ft.Colors.GREY_300
+            if i < value:
+                row_balls[i].margin = ft.margin.only(left=20, top=4, bottom=4, right=4)
+                row_balls[i].bgcolor = color
+            else:
+                row_balls[i].margin = ft.margin.all(4)
+                row_balls[i].bgcolor = ft.Colors.GREY_300
+
 
     def update_result():
         """Calcula y muestra el resultado de la operación."""
@@ -63,16 +71,13 @@ def main(page: ft.Page):
 
     def refresh_ui():
         """Actualiza toda la interfaz gráfica para reflejar el estado actual."""
-        # Resalta la fila seleccionada
         num1_label.bgcolor = ft.Colors.BLUE_100 if current_number == 1 else ft.Colors.GREY_200
         num2_label.bgcolor = ft.Colors.RED_100 if current_number == 2 else ft.Colors.GREY_200
         
-        # Actualiza textos
         op_text.value = operation
         value1_text.value = str(value1)
         value2_text.value = str(value2)
         
-        # Actualiza el color de las bolitas y el resultado
         update_balls(balls_row1, value1, ft.Colors.BLUE)
         update_balls(balls_row2, value2, ft.Colors.RED)
         update_result()
@@ -153,7 +158,7 @@ def main(page: ft.Page):
     page.add(
         ft.Column(
             [
-                ft.Text("ÁBACO", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+                ft.Text("ÁBACO ANIMADO", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
                 ft.Row([num1_label, row1_ui, ft.Column([ft.Text("  "), value1_text])], alignment=ft.MainAxisAlignment.START),
                 ft.Row([num2_label, row2_ui, ft.Column([ft.Text("  "), value2_text])], alignment=ft.MainAxisAlignment.START),
                 ft.Row([op_label, op_text, ft.Column([ft.Text("  "), result_label, result_text])], alignment=ft.MainAxisAlignment.START),
