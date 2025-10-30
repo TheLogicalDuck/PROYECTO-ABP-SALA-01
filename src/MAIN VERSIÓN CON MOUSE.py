@@ -14,7 +14,7 @@ def main(page: ft.Page):
     value1 = 0
     value2 = 0
     operation = "SUMA"
-    num_balls = 9
+    num_balls = 10
 
     # --- FUNCIONES PARA CREAR LA INTERFAZ ---
     def create_row():
