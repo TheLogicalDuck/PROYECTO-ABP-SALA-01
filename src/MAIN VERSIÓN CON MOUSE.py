@@ -17,14 +17,16 @@ def main(page: ft.Page):
         ft.Audio(src="2.wav", autoplay=False),
         ft.Audio(src="3.wav", autoplay=False),
     ]
-    # --- NUEVO: Sonidos específicos ---
+    # Sonidos específicos
     switch_sound = ft.Audio(src="switch.wav", autoplay=False)
     all_sound = ft.Audio(src="all.wav", autoplay=False)
+    select_sound = ft.Audio(src="select.wav", autoplay=False) # <-- NUEVO: Sonido para seleccionar fila
 
     # Se añaden TODOS los controles de audio a la capa 'overlay' de la página.
     page.overlay.extend(audio_effects)
-    page.overlay.append(switch_sound) # <-- AÑADIDO
-    page.overlay.append(all_sound) # <-- AÑADIDO
+    page.overlay.append(switch_sound)
+    page.overlay.append(all_sound)
+    page.overlay.append(select_sound) # <-- NUEVO: Se añade el nuevo sonido al overlay
 
     # --- ESTADO DE LA APLICACIÓN ---
     current_number = 1
@@ -102,19 +104,23 @@ def main(page: ft.Page):
         value2 = 0
         current_number = 1
         operation = "SUMA"
-        all_sound.play() # <-- CAMBIADO: Suena 'all.wav'
+        all_sound.play()
         refresh_ui()
 
     # --- ACCIONES CONTROLADAS POR TECLADO ---
     def select_up():
         nonlocal current_number
-        current_number = 1
-        refresh_ui()
+        if current_number != 1: # <-- CAMBIADO: Suena solo si hay un cambio real
+            current_number = 1
+            select_sound.play() # <-- NUEVO: Suena al seleccionar
+            refresh_ui()
 
     def select_down():
         nonlocal current_number
-        current_number = 2
-        refresh_ui()
+        if current_number != 2: # <-- CAMBIADO: Suena solo si hay un cambio real
+            current_number = 2
+            select_sound.play() # <-- NUEVO: Suena al seleccionar
+            refresh_ui()
 
     def increment():
         nonlocal value1, value2
@@ -140,7 +146,7 @@ def main(page: ft.Page):
         """Cambia la operación y reproduce el sonido 'switch'."""
         nonlocal operation
         operation = "RESTA" if operation == "SUMA" else "SUMA"
-        switch_sound.play() # <-- CAMBIADO: Suena 'switch.wav'
+        switch_sound.play()
         refresh_ui()
 
     # --- MANEJADOR DE EVENTOS DE TECLADO ---
