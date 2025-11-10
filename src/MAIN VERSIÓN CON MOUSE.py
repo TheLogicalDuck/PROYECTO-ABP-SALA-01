@@ -4,6 +4,7 @@ import random
 def main(page: ft.Page):
     page.title = "ÁBACO con Teclado"
     page.bgcolor = ft.Colors.WHITE
+    page.theme_mode = ft.ThemeMode.LIGHT
     page.window_width = 540
     page.window_height = 380
     page.window_resizable = False
