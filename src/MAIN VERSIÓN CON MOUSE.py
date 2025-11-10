@@ -3,11 +3,7 @@ import random
 
 def main(page: ft.Page):
     page.title = "ÁBACO con Teclado"
-    page.theme_mode = ft.ThemeMode.LIGHT
     page.bgcolor = ft.Colors.WHITE
-    page.decoration = ft.BoxDecoration(
-        image=ft.DecorationImage
-    )
     page.window_width = 540
     page.window_height = 380
     page.window_resizable = False
@@ -64,7 +60,6 @@ def main(page: ft.Page):
 
     row1_ui = ft.Row(balls_row1, spacing=-15)
     row2_ui = ft.Row(balls_row2, spacing=-15)
-
 
     # --- LABELS Y TEXTOS DE LA INTERFAZ ---
     # (Esta sección no cambia)
