@@ -57,9 +57,9 @@ def main(page: ft.Page):
     def create_abacus_row(balls_ui_row):
         """Crea una fila de ábaco completa con el palito detrás de las bolas."""
         rod = ft.Container(
-            width=2500,
-            height=6,
-            bgcolor=ft.Colors.BROWN_400,
+            width=150,
+            height=5,
+            bgcolor=ft.Colors.BLACK,
             border_radius=5,
         )
         
@@ -77,11 +77,11 @@ def main(page: ft.Page):
     balls_row1, balls_row2, balls_row3, balls_row4, balls_row5 = (create_balls() for _ in range(5))
 
     # --- CREACIÓN DE LAS FILAS DE UI (CON PALITOS) ---
-    abacus_row1 = create_abacus_row(ft.Row(balls_row1, spacing=-15))
-    abacus_row2 = create_abacus_row(ft.Row(balls_row2, spacing=-15))
-    abacus_row3 = create_abacus_row(ft.Row(balls_row3, spacing=-15))
-    abacus_row4 = create_abacus_row(ft.Row(balls_row4, spacing=-15))
-    abacus_row5 = create_abacus_row(ft.Row(balls_row5, spacing=-15))
+    abacus_row1 = create_abacus_row(ft.Row(balls_row1, spacing=0))
+    abacus_row2 = create_abacus_row(ft.Row(balls_row2, spacing=0))
+    abacus_row3 = create_abacus_row(ft.Row(balls_row3, spacing=0))
+    abacus_row4 = create_abacus_row(ft.Row(balls_row4, spacing=0))
+    abacus_row5 = create_abacus_row(ft.Row(balls_row5, spacing=0))
 
     # --- LABELS Y TEXTOS DE LA INTERFAZ ---
     num1_label = ft.Container(ft.Text(" Número 1 ", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.with_opacity(0.5, ft.Colors.BLACK), padding=6, border_radius=5)
