@@ -3,18 +3,15 @@ import random
 
 def main(page: ft.Page):
     page.title = "ÁBACO con Teclado"
-    page.bgcolor = ft.Colors.WHITE
     page.theme_mode = ft.ThemeMode.LIGHT
     page.window_width = 540
     page.window_height = 380
     page.window_resizable = False
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    # NUEVO: Centra todo el contenido de la página horizontalmente.
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    
+    page.padding = 0
     page.window_focused = True
 
     # --- EFECTOS DE SONIDO ---
-
     audio_effects = [
         ft.Audio(src="1.wav", autoplay=False),
         ft.Audio(src="2.wav", autoplay=False),
@@ -23,7 +20,6 @@ def main(page: ft.Page):
     switch_sound = ft.Audio(src="switch.wav", autoplay=False)
     all_sound = ft.Audio(src="all.wav", autoplay=False)
     select_sound = ft.Audio(src="select.wav", autoplay=False)
-
     page.overlay.extend(audio_effects)
     page.overlay.append(switch_sound)
     page.overlay.append(all_sound)
@@ -58,17 +54,15 @@ def main(page: ft.Page):
 
     balls_row1 = create_row()
     balls_row2 = create_row()
-
     row1_ui = ft.Row(balls_row1, spacing=-15)
     row2_ui = ft.Row(balls_row2, spacing=-15)
 
     # --- LABELS Y TEXTOS DE LA INTERFAZ ---
-    # (Esta sección no cambia)
-    num1_label = ft.Container(ft.Text(" Número 1 ", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.BLACK, padding=6)
-    num2_label = ft.Container(ft.Text(" Número 2 ", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.BLACK, padding=6)
-    op_label = ft.Container(ft.Text(" Operación seleccionada: "), bgcolor=ft.Colors.GREY_100, padding=6)
-    result_label = ft.Container(ft.Text(" Resultado: "), bgcolor=ft.Colors.GREY_100, padding=6)
-
+    num1_label = ft.Container(ft.Text(" Número 1 ", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.with_opacity(0.5, ft.Colors.BLACK), padding=6, border_radius=5)
+    num2_label = ft.Container(ft.Text(" Número 2 ", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.with_opacity(0.5, ft.Colors.BLACK), padding=6, border_radius=5)
+    op_label = ft.Container(ft.Text(" Operación seleccionada: "), bgcolor=ft.Colors.with_opacity(0.2, ft.Colors.BLACK), padding=6, border_radius=5)
+    result_label = ft.Container(ft.Text(" Resultado: "), bgcolor=ft.Colors.with_opacity(0.2, ft.Colors.BLACK), padding=6, border_radius=5)
+    
     op_text = ft.Text(operation, weight=ft.FontWeight.BOLD)
     result_text = ft.Text("0", size=18, weight=ft.FontWeight.BOLD)
     value1_text = ft.Text(str(value1))
@@ -79,7 +73,6 @@ def main(page: ft.Page):
         for i in range(num_balls):
             ball_container = row_balls[i]
             ball_image = ball_container.content
-
             if i < value:
                 ball_container.margin = ft.margin.only(left=20)
                 ball_image.src = active_image_src
@@ -94,8 +87,8 @@ def main(page: ft.Page):
         result_text.value = str(res)
 
     def refresh_ui():
-        num1_label.bgcolor = ft.Colors.BLUE_100 if current_number == 1 else ft.Colors.GREY_200
-        num2_label.bgcolor = ft.Colors.RED_100 if current_number == 2 else ft.Colors.GREY_200
+        num1_label.bgcolor = ft.Colors.with_opacity(0.8, ft.Colors.BLUE_900) if current_number == 1 else ft.Colors.with_opacity(0.5, ft.Colors.BLACK)
+        num2_label.bgcolor = ft.Colors.with_opacity(0.8, ft.Colors.RED_900) if current_number == 2 else ft.Colors.with_opacity(0.5, ft.Colors.BLACK)
         op_text.value = operation
         value1_text.value = str(value1)
         value2_text.value = str(value2)
@@ -106,15 +99,11 @@ def main(page: ft.Page):
 
     def reset():
         nonlocal value1, value2, current_number, operation
-        value1 = 0
-        value2 = 0
-        current_number = 1
-        operation = "SUMA"
+        value1, value2, current_number, operation = 0, 0, 1, "SUMA"
         all_sound.play()
         refresh_ui()
 
     # --- ACCIONES CONTROLADAS POR TECLADO ---
-    # (Esta sección no cambia)
     def select_up():
         nonlocal current_number
         if current_number != 1:
@@ -133,20 +122,18 @@ def main(page: ft.Page):
         nonlocal value1, value2
         if current_number == 1 and value1 < num_balls:
             value1 += 1
-            play_sound()
         elif current_number == 2 and value2 < num_balls:
             value2 += 1
-            play_sound()
+        play_sound()
         refresh_ui()
 
     def decrement():
         nonlocal value1, value2
         if current_number == 1 and value1 > 0:
             value1 -= 1
-            play_sound()
         elif current_number == 2 and value2 > 0:
             value2 -= 1
-            play_sound()
+        play_sound()
         refresh_ui()
 
     def toggle_operation():
@@ -156,39 +143,54 @@ def main(page: ft.Page):
         refresh_ui()
 
     def on_key(e: ft.KeyboardEvent):
-        key = (e.key or " ").lower()
-        if key == "w":
-            select_up()
-        elif key == "s":
-            select_down()
-        elif key == "d":
-            increment()
-        elif key == "a":
-            decrement()
-        elif key == " ":
-            toggle_operation()
-        elif key == "r":
-            reset()
+        key_map = {
+            "w": select_up, "s": select_down,
+            "d": increment, "a": decrement,
+            " ": toggle_operation, "r": reset,
+        }
+        action = key_map.get((e.key or "").lower())
+        if action:
+            action()
 
     page.on_keyboard_event = on_key
 
     # --- CONSTRUCCIÓN DE LA INTERFAZ PRINCIPAL ---
+    content_column = ft.Column(
+        [
+            ft.Text("ÁBACO", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+            ft.Row([num1_label, row1_ui, ft.Column([ft.Text("  "), value1_text])], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Row([num2_label, row2_ui, ft.Column([ft.Text("  "), value2_text])], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Row([op_label, op_text, ft.Column([ft.Text("  "), result_label, result_text])], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Divider(),
+            ft.Text("Usa el teclado:", weight=ft.FontWeight.BOLD),
+            ft.Text(" 'W' y 'S': Seleccionar fila | 'A' y 'D': Quitar y Añadir bolita"),
+            ft.Text(" 'Espacio': Cambiar operación | 'R': Resetear"),
+        ],
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        spacing=12,
+    )
+    
     page.add(
-        ft.Column(
+        ft.Stack(
             [
-                ft.Text("ÁBACO", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
-                # MODIFICADO: Se centra la alineación de las filas.
-                ft.Row([num1_label, row1_ui, ft.Column([ft.Text("  "), value1_text])], alignment=ft.MainAxisAlignment.CENTER),
-                ft.Row([num2_label, row2_ui, ft.Column([ft.Text("  "), value2_text])], alignment=ft.MainAxisAlignment.CENTER),
-                ft.Row([op_label, op_text, ft.Column([ft.Text("  "), result_label, result_text])], alignment=ft.MainAxisAlignment.CENTER),
-                ft.Divider(),
-                ft.Text("Usa el teclado:", weight=ft.FontWeight.BOLD),
-                ft.Text(" 'W' y 'S': Seleccionar fila | 'A' y 'D': Quitar y Añadir bolita"),
-                ft.Text(" 'Espacio': Cambiar operación | 'R': Resetear"),
+                ft.Image(
+                    src="bg.png",
+                    fit=ft.ImageFit.COVER,
+                    expand=True,
+                ),
+                
+                ft.Container(
+                    content=ft.Container(
+                        content=content_column,
+                        padding=20,
+                        bgcolor=ft.Colors.with_opacity(0.7, ft.Colors.WHITE),
+                        border_radius=10,
+                    ),
+                    alignment=ft.alignment.center,
+                    expand=True,
+                )
             ],
-            # MODIFICADO: La columna ahora centra su contenido horizontalmente.
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=12,
+            expand=True,
         )
     )
 
