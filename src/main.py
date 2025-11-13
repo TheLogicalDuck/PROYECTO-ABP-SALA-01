@@ -12,6 +12,42 @@ def main(page: ft.Page):
     page.bgcolor = ft.Colors.TRANSPARENT
     page.window_bgcolor = ft.Colors.TRANSPARENT
 
+    # --- WIDGETS QUE CAMBIARÁN CON EL TEMA ---
+    # Se definen aquí para que la función de cambio de tema pueda acceder a ellos.
+    title_text = ft.Text(
+        "ÁBACO EN MAKEY MAKEY",
+        size=28,
+        weight=ft.FontWeight.BOLD,
+        color=ft.Colors.BLACK  # Inicia en negro para el modo claro
+    )
+
+    background_image = ft.Image(
+        src="bg.png",  # Imagen inicial para el modo claro
+        fit=ft.ImageFit.COVER,
+        expand=False,
+        offset=ft.Offset(0, 0.05),
+        scale=1.2,
+    )
+
+    # --- FUNCIÓN PARA CAMBIAR EL TEMA (MODO OSCURO) ---
+    def toggle_dark_mode(e):
+        if page.theme_mode == ft.ThemeMode.LIGHT:
+            page.theme_mode = ft.ThemeMode.DARK
+            title_text.color = ft.Colors.WHITE      # Letras blancas en modo oscuro
+            background_image.src = "bgdark.png"     # Imagen de fondo oscuro
+        else:
+            page.theme_mode = ft.ThemeMode.LIGHT
+            title_text.color = ft.Colors.BLACK      # Letras negras en modo claro
+            background_image.src = "bg.png"         # Imagen de fondo claro
+        page.update()
+
+    # --- BOTÓN DE MODO OSCURO ---
+    theme_button = ft.IconButton(
+        icon=ft.Icons.BRIGHTNESS_4_OUTLINED,
+        on_click=toggle_dark_mode,
+        tooltip="Cambiar tema"
+    )
+
     # --- EFECTOS DE SONIDO ---
     audio_effects = [
         ft.Audio(src="1.wav", autoplay=False),
@@ -65,13 +101,11 @@ def main(page: ft.Page):
     # --- CORRECCIÓN: PALITOS CENTRADOS Y ALARGADOS ---
     def create_abacus_row(balls_ui_row):
         """Crea una fila de ábaco con la varilla centrada y alargada detrás de las bolitas."""
-        # Calcula el ancho base de la fila de bolas
         balls_width = num_balls * 38 + (num_balls - 1) * 2
-        # Hace la varilla más larga añadiendo 40 píxeles (20 a cada lado)
         rod_width = balls_width + 136
 
         rod = ft.Container(
-            width=rod_width,  # Usa el nuevo ancho, más largo
+            width=rod_width,
             height=6,
             gradient=ft.LinearGradient(
                 begin=ft.alignment.top_center,
@@ -79,7 +113,6 @@ def main(page: ft.Page):
                 colors=[ft.Colors.GREY_700, ft.Colors.GREY_900],
             ),
             border_radius=5,
-            # No se necesita margen; el alineamiento del Stack se encarga de centrarlo.
         )
 
         return ft.Stack(
@@ -92,7 +125,6 @@ def main(page: ft.Page):
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
             ],
-            # Esta alineación centra tanto la varilla como la fila de bolas dentro del Stack.
             alignment=ft.alignment.center,
         )
 
@@ -226,12 +258,7 @@ def main(page: ft.Page):
 
     content_column = ft.Column(
         [
-            ft.Text(
-                "ÁBACO EN MAKEY MAKEY",
-                size=28,
-                weight=ft.FontWeight.BOLD,
-                color=ft.Colors.WHITE
-            ),
+            title_text, # Se usa la variable del título definida al inicio
             ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
             *abacus_rows_with_labels,
             ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
@@ -259,25 +286,25 @@ def main(page: ft.Page):
     page.add(
         ft.Stack(
             [
-                ft.Image(
-                    src="bg.png",
-                    fit=ft.ImageFit.COVER,
-                    expand=False,
-                    offset=ft.Offset(0, 0.05),
-                    scale=1.2,
-                ),
+                background_image, # Se usa la variable de la imagen de fondo
                 ft.Container(
                     content=content_column,
                     expand=False,
                     padding=ft.padding.symmetric(horizontal=30, vertical=10),
                     margin=15,
                     border_radius=15,
-                    border=ft.border.all(2, ft.Colors.with_opacity(0.3, ft.Colors.WHITE)),
-                    bgcolor=ft.Colors.with_opacity(0.25, ft.Colors.BLACK),
+                    border=ft.border.all(2, ft.Colors.with_opacity(0, ft.Colors.WHITE)),
+                    bgcolor=ft.Colors.with_opacity(0, ft.Colors.BLACK),
                     shadow=ft.BoxShadow(
                         blur_radius=30,
-                        color=ft.Colors.with_opacity(0.5, ft.Colors.BLACK)
+                        color=ft.Colors.with_opacity(0, ft.Colors.BLACK)
                     )
+                ),
+                # Se añade el botón de tema en la esquina superior derecha
+                ft.Container(
+                    content=theme_button,
+                    top=10,
+                    right=10
                 )
             ],
             expand=False,
