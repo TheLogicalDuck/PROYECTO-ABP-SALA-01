@@ -62,12 +62,16 @@ def main(page: ft.Page):
             for _ in range(num_balls)
         ]
 
-    # --- CORRECCIÓN: PALITOS CENTRADOS ---
+    # --- CORRECCIÓN: PALITOS CENTRADOS Y ALARGADOS ---
     def create_abacus_row(balls_ui_row):
-        """Crea una fila de ábaco con la varilla centrada detrás de las bolitas."""
-        total_width = num_balls * 38 + (num_balls - 1) * 2
+        """Crea una fila de ábaco con la varilla centrada y alargada detrás de las bolitas."""
+        # Calcula el ancho base de la fila de bolas
+        balls_width = num_balls * 38 + (num_balls - 1) * 2
+        # Hace la varilla más larga añadiendo 40 píxeles (20 a cada lado)
+        rod_width = balls_width + 40
+
         rod = ft.Container(
-            width=total_width,
+            width=rod_width,  # Usa el nuevo ancho, más largo
             height=6,
             gradient=ft.LinearGradient(
                 begin=ft.alignment.top_center,
@@ -75,8 +79,7 @@ def main(page: ft.Page):
                 colors=[ft.Colors.GREY_700, ft.Colors.GREY_900],
             ),
             border_radius=5,
-            alignment=ft.alignment.center,
-            margin=ft.margin.only(top=16),
+            # No se necesita margen; el alineamiento del Stack se encarga de centrarlo.
         )
 
         return ft.Stack(
@@ -89,6 +92,7 @@ def main(page: ft.Page):
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
             ],
+            # Esta alineación centra tanto la varilla como la fila de bolas dentro del Stack.
             alignment=ft.alignment.center,
         )
 
