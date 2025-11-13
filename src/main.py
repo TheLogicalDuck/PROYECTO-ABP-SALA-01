@@ -263,7 +263,8 @@ def main(page: ft.Page):
                     src="bg.png",
                     fit=ft.ImageFit.COVER,
                     expand=False,
-                    offset=ft.Offset(0, 0.08),
+                    offset=ft.Offset(0, 0.05),
+                    scale=1.2,
                 ),
                 ft.Container(
                     content=content_column,
