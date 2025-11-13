@@ -1,15 +1,16 @@
 import flet as ft
 import random
+from math import pi
 
 def main(page: ft.Page):
     page.title = "ÁBACO con Teclado"
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.window_width = 580
-    page.window_height = 550
+    page.window_width = 620
+    page.window_height = 500
     page.window_resizable = False
-    
     page.padding = 0
-    page.window_focused = True
+    page.bgcolor = ft.Colors.TRANSPARENT
+    page.window_bgcolor = ft.Colors.TRANSPARENT
 
     # --- EFECTOS DE SONIDO ---
     audio_effects = [
@@ -20,25 +21,31 @@ def main(page: ft.Page):
     switch_sound = ft.Audio(src="switch.wav", autoplay=False)
     all_sound = ft.Audio(src="all.wav", autoplay=False)
     select_sound = ft.Audio(src="select.wav", autoplay=False)
-    page.overlay.extend(audio_effects)
-    page.overlay.append(switch_sound)
-    page.overlay.append(all_sound)
-    page.overlay.append(select_sound)
+    page.overlay.extend(audio_effects + [switch_sound, all_sound, select_sound])
 
     # --- ESTADO DE LA APLICACIÓN ---
     current_number = 1
     value1, value2, value3, value4, value5 = 0, 0, 0, 0, 0
     operation = "SUMA"
-    num_balls = 15
+    num_balls = 10
     num_rows = 5
 
-    # --- FUNCIÓN PARA REPRODUCIR SONIDO ---
+    # --- COLORES Y ESTILOS ---
+    ROW_COLORS = [ft.Colors.BLUE, ft.Colors.RED, ft.Colors.GREEN, ft.Colors.ORANGE, ft.Colors.PURPLE]
+    BALL_IMAGES = ["bola_azul.png", "bola_roja.png", "bola_verde.png", "bola_amarilla.png", "bola_morada.png"]
+    SHADOW_EFFECT = ft.BoxShadow(
+        spread_radius=1,
+        blur_radius=10,
+        color=ft.Colors.with_opacity(0.3, ft.Colors.BLACK),
+        offset=ft.Offset(2, 2),
+    )
+
+    # --- FUNCIÓN PARA SONIDO ---
     def play_sound():
         random.choice(audio_effects).play()
 
-    # --- FUNCIONES PARA CREAR LA INTERFAZ ---
+    # --- CREACIÓN DE BOLAS ---
     def create_balls():
-        """Crea la lista de contenedores de bolas para una fila."""
         return [
             ft.Container(
                 width=38,
@@ -48,116 +55,114 @@ def main(page: ft.Page):
                     fit=ft.ImageFit.CONTAIN,
                     opacity=0.5,
                 ),
-                # Esta animación se aplicará a cualquier cambio de propiedad, incluido el margen (margin)
                 animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT_BACK),
+                shadow=SHADOW_EFFECT,
+                border_radius=ft.border_radius.all(20)
             )
             for _ in range(num_balls)
         ]
 
+    # --- CORRECCIÓN: PALITOS CENTRADOS ---
     def create_abacus_row(balls_ui_row):
-        """Crea una fila de ábaco completa con el palito detrás de las bolas."""
+        """Crea una fila de ábaco con la varilla centrada detrás de las bolitas."""
+        total_width = num_balls * 38 + (num_balls - 1) * 2
         rod = ft.Container(
-            width=150,
-            height=5,
-            bgcolor=ft.Colors.BLACK,
+            width=total_width,
+            height=6,
+            gradient=ft.LinearGradient(
+                begin=ft.alignment.top_center,
+                end=ft.alignment.bottom_center,
+                colors=[ft.Colors.GREY_700, ft.Colors.GREY_900],
+            ),
             border_radius=5,
+            alignment=ft.alignment.center,
+            margin=ft.margin.only(top=16),
         )
-        
+
         return ft.Stack(
             [
-                ft.Container(
-                    content=rod,
-                    alignment=ft.alignment.center,
+                rod,
+                ft.Row(
+                    controls=balls_ui_row.controls,
+                    spacing=2,
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
-                balls_ui_row,
-            ]
+            ],
+            alignment=ft.alignment.center,
         )
 
-    # --- CREACIÓN DE LAS FILAS DE BOLAS ---
-    balls_row1, balls_row2, balls_row3, balls_row4, balls_row5 = (create_balls() for _ in range(5))
+    # --- FILAS DE BOLAS ---
+    all_ball_rows_ui = [ft.Row(create_balls(), spacing=0) for _ in range(num_rows)]
+    all_abacus_ui_rows = [create_abacus_row(row) for row in all_ball_rows_ui]
 
-    # --- CREACIÓN DE LAS FILAS DE UI (CON PALITOS) ---
-    abacus_row1 = create_abacus_row(ft.Row(balls_row1, spacing=0))
-    abacus_row2 = create_abacus_row(ft.Row(balls_row2, spacing=0))
-    abacus_row3 = create_abacus_row(ft.Row(balls_row3, spacing=0))
-    abacus_row4 = create_abacus_row(ft.Row(balls_row4, spacing=0))
-    abacus_row5 = create_abacus_row(ft.Row(balls_row5, spacing=0))
+    # --- LABELS Y TEXTOS ---
+    all_labels = [
+        ft.Container(
+            content=ft.Text(f"Número {i+1}", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+            width=100,
+            alignment=ft.alignment.center,
+            padding=8,
+            border_radius=8,
+            shadow=SHADOW_EFFECT,
+            animate_scale=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
+        ) for i in range(num_rows)
+    ]
 
-    # --- LABELS Y TEXTOS DE LA INTERFAZ ---
-    num1_label = ft.Container(ft.Text(" Número 1 ", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.with_opacity(0.5, ft.Colors.BLACK), padding=6, border_radius=5)
-    num2_label = ft.Container(ft.Text(" Número 2 ", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.with_opacity(0.5, ft.Colors.BLACK), padding=6, border_radius=5)
-    num3_label = ft.Container(ft.Text(" Número 3 ", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.with_opacity(0.5, ft.Colors.BLACK), padding=6, border_radius=5)
-    num4_label = ft.Container(ft.Text(" Número 4 ", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.with_opacity(0.5, ft.Colors.BLACK), padding=6, border_radius=5)
-    num5_label = ft.Container(ft.Text(" Número 5 ", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.with_opacity(0.5, ft.Colors.BLACK), padding=6, border_radius=5)
-    
-    op_label = ft.Container(ft.Text(" Operación: "), bgcolor=ft.Colors.with_opacity(0.2, ft.Colors.BLACK), padding=6, border_radius=5)
-    result_label = ft.Container(ft.Text(" Resultado: "), bgcolor=ft.Colors.with_opacity(0.2, ft.Colors.BLACK), padding=6, border_radius=5)
-    
-    op_text = ft.Text(operation, weight=ft.FontWeight.BOLD)
-    result_text = ft.Text("0", size=18, weight=ft.FontWeight.BOLD)
-    value1_text, value2_text, value3_text, value4_text, value5_text = (ft.Text("0") for _ in range(5))
+    op_text = ft.Text(operation, weight=ft.FontWeight.BOLD, size=16)
+    result_text = ft.Text("0", size=24, weight=ft.FontWeight.BOLD)
+    all_value_texts = [ft.Text("0", weight=ft.FontWeight.BOLD, size=16) for _ in range(num_rows)]
 
-    # --- LÓGICA DE LA APLICACIÓN ---
-    def update_balls(row_balls, value, active_image_src):
-        """Mueve las bolas a la izquierda o derecha usando la propiedad 'margin'."""
-        gap_pixels = 120  # Espacio en el centro del ábaco
-        
-        # El punto que divide las bolas activas de las inactivas
+    # --- ACTUALIZAR BOLAS ---
+    def update_balls(row_index, value):
+        gap_pixels = 120
         split_index = num_balls - value
+        ball_row = all_ball_rows_ui[row_index].controls
 
-        for i in range(num_balls):
-            ball_container = row_balls[i]
+        for i, ball_container in enumerate(ball_row):
             ball_image = ball_container.content
-            
-            # Bolas inactivas a la izquierda
             if i < split_index:
-                ball_container.margin = ft.margin.all(0) # Sin margen, se agrupan a la izquierda
+                ball_container.margin = ft.margin.all(0)
                 ball_image.src = "bola_gris.png"
                 ball_image.opacity = 0.5
-            # Bolas activas a la derecha
             else:
-                # Si esta es la PRIMERA bola activa, le aplicamos un gran margen
-                # para crear el espacio que empuja a todo el grupo a la derecha.
-                if i == split_index:
-                    ball_container.margin = ft.margin.only(left=gap_pixels)
-                # Las demás bolas activas no necesitan margen extra
-                else:
-                    ball_container.margin = ft.margin.all(0)
-
-                ball_image.src = active_image_src
+                ball_container.margin = ft.margin.only(left=gap_pixels) if i == split_index else ft.margin.all(0)
+                ball_image.src = BALL_IMAGES[row_index]
                 ball_image.opacity = 1
 
-
+    # --- RESULTADO ---
     def update_result():
-        total = value1 + value2 + value3 + value4 + value5
-        res = total if operation == "SUMA" else value1 - value2 - value3 - value4 - value5
+        values = [int(v.value) for v in all_value_texts]
+        total = sum(values)
+        res = total if operation == "SUMA" else values[0] - sum(values[1:])
         result_text.value = str(res)
 
     def refresh_ui():
-        labels = [num1_label, num2_label, num3_label, num4_label, num5_label]
-        colors = [ft.Colors.BLUE_900, ft.Colors.RED_900, ft.Colors.GREEN_900, ft.Colors.AMBER_900, ft.Colors.PURPLE_900]
-        for i, label in enumerate(labels):
-            label.bgcolor = ft.Colors.with_opacity(0.8, colors[i]) if current_number == i + 1 else ft.Colors.with_opacity(0.5, ft.Colors.BLACK)
-
+        nonlocal value1, value2, value3, value4, value5
+        values = [value1, value2, value3, value4, value5]
+        for i in range(num_rows):
+            label = all_labels[i]
+            if current_number == i + 1:
+                label.bgcolor = ROW_COLORS[i]
+                label.scale = 1.1
+            else:
+                label.bgcolor = ft.Colors.with_opacity(0.5, ft.Colors.BLACK)
+                label.scale = 1.0
+            all_value_texts[i].value = str(values[i])
+            update_balls(i, values[i])
         op_text.value = operation
-        value1_text.value, value2_text.value, value3_text.value, value4_text.value, value5_text.value = str(value1), str(value2), str(value3), str(value4), str(value5)
-
-        update_balls(balls_row1, value1, "bola_azul.png")
-        update_balls(balls_row2, value2, "bola_roja.png")
-        update_balls(balls_row3, value3, "bola_verde.png")
-        update_balls(balls_row4, value4, "bola_amarilla.png")
-        update_balls(balls_row5, value5, "bola_morada.png")
-        
         update_result()
         page.update()
 
     def reset():
         nonlocal value1, value2, value3, value4, value5, current_number, operation
-        value1, value2, value3, value4, value5, current_number, operation = 0, 0, 0, 0, 0, 1, "SUMA"
+        value1, value2, value3, value4, value5 = 0, 0, 0, 0, 0
+        current_number = 1
+        operation = "SUMA"
         all_sound.play()
         refresh_ui()
 
-    # --- ACCIONES CONTROLADAS POR TECLADO ---
+    # --- TECLADO ---
     def select_up():
         nonlocal current_number
         if current_number > 1:
@@ -172,20 +177,12 @@ def main(page: ft.Page):
             select_sound.play()
             refresh_ui()
 
-    def increment():
+    def update_value(delta):
         nonlocal value1, value2, value3, value4, value5
         values = [value1, value2, value3, value4, value5]
-        if values[current_number - 1] < num_balls:
-            values[current_number - 1] += 1
-            value1, value2, value3, value4, value5 = values
-            play_sound()
-            refresh_ui()
-
-    def decrement():
-        nonlocal value1, value2, value3, value4, value5
-        values = [value1, value2, value3, value4, value5]
-        if values[current_number - 1] > 0:
-            values[current_number - 1] -= 1
+        new_value = values[current_number - 1] + delta
+        if 0 <= new_value <= num_balls:
+            values[current_number - 1] = new_value
             value1, value2, value3, value4, value5 = values
             play_sound()
             refresh_ui()
@@ -199,54 +196,90 @@ def main(page: ft.Page):
     def on_key(e: ft.KeyboardEvent):
         key_map = {
             "w": select_up, "s": select_down,
-            "d": increment, "a": decrement,
+            "d": lambda: update_value(1), "a": lambda: update_value(-1),
             " ": toggle_operation, "r": reset,
         }
-        action = key_map.get((e.key or "").lower())
-        if action: action()
+        action = key_map.get(e.key.lower())
+        if action:
+            action()
 
     page.on_keyboard_event = on_key
 
-    # --- CONSTRUCCIÓN DE LA INTERFAZ PRINCIPAL ---
-    abacus_container_width = 410
+    # --- INTERFAZ ---
+    abacus_rows_with_labels = []
+    for i in range(num_rows):
+        abacus_rows_with_labels.append(
+            ft.Row(
+                [
+                    all_labels[i],
+                    ft.Container(content=all_abacus_ui_rows[i], expand=True),
+                    ft.Container(all_value_texts[i], width=30, alignment=ft.alignment.center_right)
+                ],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER
+            )
+        )
+
     content_column = ft.Column(
         [
-            ft.Text("ÁBACO", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
-            ft.Row([num1_label, ft.Container(content=abacus_row1, width=abacus_container_width), value1_text], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            ft.Row([num2_label, ft.Container(content=abacus_row2, width=abacus_container_width), value2_text], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            ft.Row([num3_label, ft.Container(content=abacus_row3, width=abacus_container_width), value3_text], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            ft.Row([num4_label, ft.Container(content=abacus_row4, width=abacus_container_width), value4_text], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            ft.Row([num5_label, ft.Container(content=abacus_row5, width=abacus_container_width), value5_text], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            ft.Row([op_label, op_text, result_label, result_text], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
-            ft.Divider(),
-            ft.Text("Usa el teclado:", weight=ft.FontWeight.BOLD),
-            ft.Text(" 'W' y 'S': Seleccionar fila | 'A' y 'D': Mover bolas"),
-            ft.Text(" 'Espacio': Cambiar operación | 'R': Resetear"),
+            ft.Text(
+                "ÁBACO EN MAKEY MAKEY",
+                size=28,
+                weight=ft.FontWeight.BOLD,
+                color=ft.Colors.WHITE
+            ),
+            ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
+            *abacus_rows_with_labels,
+            ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+            ft.Card(
+                content=ft.Container(
+                    content=ft.Row(
+                        [
+                            ft.Text("Operación:", size=16), op_text,
+                            ft.VerticalDivider(width=20),
+                            ft.Text("Resultado:", size=16), result_text
+                        ],
+                        alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER
+                    ),
+                    padding=15,
+                )
+            ),
+            ft.Image(src="instrucciones.png")
         ],
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        spacing=12,
+        spacing=10,
     )
-    
+
+    # --- FONDO Y MARCO ---
     page.add(
         ft.Stack(
             [
-                ft.Image(src="bg.png", fit=ft.ImageFit.COVER, expand=True),
+                ft.Image(
+                    src="bg.png",
+                    fit=ft.ImageFit.COVER,
+                    expand=False,
+                    offset=ft.Offset(0, 0.08),
+                ),
                 ft.Container(
-                    content=ft.Container(
-                        content=content_column,
-                        padding=20,
-                        bgcolor=ft.Colors.with_opacity(0.7, ft.Colors.WHITE),
-                        border_radius=10,
-                    ),
-                    alignment=ft.alignment.center,
-                    expand=True,
+                    content=content_column,
+                    expand=False,
+                    padding=ft.padding.symmetric(horizontal=30, vertical=10),
+                    margin=15,
+                    border_radius=15,
+                    border=ft.border.all(2, ft.Colors.with_opacity(0.3, ft.Colors.WHITE)),
+                    bgcolor=ft.Colors.with_opacity(0.25, ft.Colors.BLACK),
+                    shadow=ft.BoxShadow(
+                        blur_radius=30,
+                        color=ft.Colors.with_opacity(0.5, ft.Colors.BLACK)
+                    )
                 )
             ],
-            expand=True,
+            expand=False,
         )
     )
 
     refresh_ui()
 
-# --- INICIAR LA APLICACIÓN ---
+# --- EJECUTAR ---
 ft.app(target=main, assets_dir="assets")
