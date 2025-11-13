@@ -68,7 +68,7 @@ def main(page: ft.Page):
         # Calcula el ancho base de la fila de bolas
         balls_width = num_balls * 38 + (num_balls - 1) * 2
         # Hace la varilla más larga añadiendo 40 píxeles (20 a cada lado)
-        rod_width = balls_width + 40
+        rod_width = balls_width + 136
 
         rod = ft.Container(
             width=rod_width,  # Usa el nuevo ancho, más largo
