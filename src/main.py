@@ -13,32 +13,32 @@ def main(page: ft.Page):
     page.window_bgcolor = ft.Colors.TRANSPARENT
 
     # --- WIDGETS QUE CAMBIARÁN CON EL TEMA ---
-    # Se definen aquí para que la función de cambio de tema pueda acceder a ellos.
+    # Definidos aquí para que la función de cambio de tema pueda acceder a ellos.
     title_text = ft.Text(
         "ÁBACO EN MAKEY MAKEY",
         size=28,
         weight=ft.FontWeight.BOLD,
-        color=ft.Colors.BLACK  # Inicia en negro para el modo claro
+        color=ft.Colors.BLACK
     )
 
     background_image = ft.Image(
-        src="bg.png",  # Imagen inicial para el modo claro
+        src="bg.png",
         fit=ft.ImageFit.COVER,
         expand=False,
         offset=ft.Offset(0, 0.05),
         scale=1.2,
     )
 
-    # --- FUNCIÓN PARA CAMBIAR EL TEMA (MODO OSCURO) ---
+    # --- FUNCIÓN PARA CAMBIAR EL TEMA ---
     def toggle_dark_mode(e):
         if page.theme_mode == ft.ThemeMode.LIGHT:
             page.theme_mode = ft.ThemeMode.DARK
-            title_text.color = ft.Colors.WHITE      # Letras blancas en modo oscuro
-            background_image.src = "bgdark.png"     # Imagen de fondo oscuro
+            title_text.color = ft.Colors.WHITE
+            background_image.src = "bgdark.png"
         else:
             page.theme_mode = ft.ThemeMode.LIGHT
-            title_text.color = ft.Colors.BLACK      # Letras negras en modo claro
-            background_image.src = "bg.png"         # Imagen de fondo claro
+            title_text.color = ft.Colors.BLACK
+            background_image.src = "bg.png"
         page.update()
 
     # --- BOTÓN DE MODO OSCURO ---
@@ -98,9 +98,8 @@ def main(page: ft.Page):
             for _ in range(num_balls)
         ]
 
-    # --- CORRECCIÓN: PALITOS CENTRADOS Y ALARGADOS ---
+    # --- CREACIÓN DE FILA DEL ÁBACO ---
     def create_abacus_row(balls_ui_row):
-        """Crea una fila de ábaco con la varilla centrada y alargada detrás de las bolitas."""
         balls_width = num_balls * 38 + (num_balls - 1) * 2
         rod_width = balls_width + 136
 
@@ -166,7 +165,7 @@ def main(page: ft.Page):
                 ball_image.src = BALL_IMAGES[row_index]
                 ball_image.opacity = 1
 
-    # --- RESULTADO ---
+    # --- CÁLCULO DE RESULTADO ---
     def update_result():
         values = [int(v.value) for v in all_value_texts]
         total = sum(values)
@@ -198,7 +197,7 @@ def main(page: ft.Page):
         all_sound.play()
         refresh_ui()
 
-    # --- TECLADO ---
+    # --- CONTROLES DE TECLADO ---
     def select_up():
         nonlocal current_number
         if current_number > 1:
@@ -241,7 +240,7 @@ def main(page: ft.Page):
 
     page.on_keyboard_event = on_key
 
-    # --- INTERFAZ ---
+    # --- DISEÑO DE LA INTERFAZ ---
     abacus_rows_with_labels = []
     for i in range(num_rows):
         abacus_rows_with_labels.append(
@@ -258,7 +257,7 @@ def main(page: ft.Page):
 
     content_column = ft.Column(
         [
-            title_text, # Se usa la variable del título definida al inicio
+            title_text,
             ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
             *abacus_rows_with_labels,
             ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
@@ -282,11 +281,11 @@ def main(page: ft.Page):
         spacing=10,
     )
 
-    # --- FONDO Y MARCO ---
+    # --- ESTRUCTURA PRINCIPAL DE LA PÁGINA ---
     page.add(
         ft.Stack(
             [
-                background_image, # Se usa la variable de la imagen de fondo
+                background_image,
                 ft.Container(
                     content=content_column,
                     expand=False,
@@ -300,7 +299,6 @@ def main(page: ft.Page):
                         color=ft.Colors.with_opacity(0, ft.Colors.BLACK)
                     )
                 ),
-                # Se añade el botón de tema en la esquina superior derecha
                 ft.Container(
                     content=theme_button,
                     top=10,
@@ -313,5 +311,5 @@ def main(page: ft.Page):
 
     refresh_ui()
 
-# --- EJECUTAR ---
+# --- EJECUTAR APLICACIÓN ---
 ft.app(target=main, assets_dir="assets")
